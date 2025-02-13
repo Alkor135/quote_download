@@ -11,9 +11,8 @@ import urllib.request
 import time
 import zipfile
 from io import StringIO
-# from datetime import date
-
 from pathlib import Path
+
 import pandas as pd
 
 from settings import *
@@ -200,7 +199,8 @@ if __name__ == "__main__":
 
     start_date_range = datetime.date(2025, 1, 1)  # Дата начала закачки
     # end_date_range = datetime.date(2025, 1, 27)  # Дата окончания закачки
-    end_date_range = datetime.date.today()  # Дата окончания закачки — текущая дата
+    # Дата окончания закачки — текущая дата минус 1 день
+    end_date_range = datetime.date.today() - datetime.timedelta(days=1)
     # ------------------------------------------------------------------------
 
     # Далее идет исполняемый код (не настройки)
