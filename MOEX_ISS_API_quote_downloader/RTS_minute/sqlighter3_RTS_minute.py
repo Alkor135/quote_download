@@ -33,13 +33,17 @@ def create_tables(connection, cursor):
 def non_empty_table_futures(connection, cursor):
     """Проверяем, есть ли записи в таблице 'Minute' в БД"""
     with connection:
-        return cursor.execute("SELECT count(*) FROM (select 1 from Minute limit 1)").fetchall()[0][0]
+        return cursor.execute(
+            "SELECT count(*) FROM (select 1 from Minute limit 1)"
+        ).fetchall()[0][0]
 
 
 def tradedate_futures_exists(connection, cursor, tradedate):
     """Проверяем, есть ли указанная дата в таблице 'Minute' в БД"""
     with connection:
-        result = cursor.execute('SELECT * FROM `Minute` WHERE `TRADEDATE` = ?', (tradedate,)).fetchall()
+        result = cursor.execute(
+            'SELECT * FROM `Minute` WHERE `TRADEDATE` = ?', (tradedate,)
+        ).fetchall()
         return bool(len(result))
 
 
@@ -47,25 +51,37 @@ def add_row(connection, cursor, tradedatetime, secid, open, low, high, close, vo
     """Добавляет строку в таблицу Minute """
     with connection:
         return cursor.execute(
-            "INSERT INTO `Minute` (`TRADEDATE`, `SECID`, `OPEN`, `LOW`, `HIGH`, `CLOSE`, `VOLUME`, "
-            "`LSTTRADE`) VALUES(?,?,?,?,?,?,?,?)",
-            (tradedatetime, secid, open, low, high, close, volume, lsttrade))
+            "INSERT INTO `Minute` (`TRADEDATE`, `SECID`, `OPEN`, `LOW`, `HIGH`, `CLOSE`, "
+            "`VOLUME`, `LSTTRADE`) VALUES(?,?,?,?,?,?,?,?)",
+            (tradedatetime, secid, open, low, high, close, volume, lsttrade)
+        )
 
 
 def get_tradedate_future(connection):  # Используется для перебора дат в
-    """ Возвращает Dataframe с: дата торгов, короткое имя, последний день торгов из БД SQL по фьючерсам """
+    """
+    Возвращает Dataframe с: дата торгов, короткое имя,
+    последний день торгов из БД SQL по фьючерсам
+    """
     with connection:
-        return pd.read_sql('SELECT `TRADEDATE`, `SHORTNAME`, `LSTTRADE` FROM `Day`', connection)
+        return pd.read_sql(
+            'SELECT `TRADEDATE`, `SHORTNAME`, `LSTTRADE` FROM `Day`', connection
+        )
 
 
 def get_tradedate_future_update(connection, start_date):
     """ Получение дат из обновленной таблицы Day, для обновления таблицы Options """
     with connection:
-        return pd.read_sql(f'SELECT TRADEDATE, SHORTNAME FROM Day WHERE TRADEDATE >= "{start_date}"', connection)
+        return pd.read_sql(
+            f'SELECT TRADEDATE, SHORTNAME FROM Day WHERE TRADEDATE >= "{start_date}"',
+            connection
+        )
 
 
 def get_tradedate_future_date(connection, cursor, datedraw):
-    """ Возвращает: дата торгов, low, high, close, короткое имя, последний день торгов из БД SQL на дату """
+    """
+    Возвращает: дата торгов, low, high, close, короткое имя,
+    последний день торгов из БД SQL на дату
+    """
     with connection:
         return cursor.execute('SELECT LOW, HIGH, CLOSE, SHORTNAME, LSTTRADE '
                               'FROM Day WHERE TRADEDATE = ?', (datedraw,)).fetchall()[0]
@@ -92,3 +108,10 @@ if __name__ == '__main__':  # Создание БД, если её не суще
     connection: Any = sqlite3.connect(fr'{path_bd}\{file_bd}', check_same_thread=True)
     cursor: Any = connection.cursor()
     create_tables(connection, cursor)  # Создание таблиц в БД если их нет
+
+    # Выполняем команду VACUUM
+    cursor.execute("VACUUM;")
+
+    # Закрываем курсор и соединение
+    cursor.close()
+    connection.close()
