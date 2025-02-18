@@ -48,7 +48,7 @@ def get_info_future(session: Any, security: str):
     return pd.Series([shortname, lsttrade])
 
 
-def get_future_date_results(tradedate: date, tiker: str):
+def get_future_date_results(tradedate: date, ticker: str):
     today_date = datetime.now().date()  # Текущая дата и время
 
     arguments = {'securities.columns': (
@@ -64,7 +64,7 @@ def get_future_date_results(tradedate: date, tiker: str):
             if not sqlighter3_RTS_day.tradedate_futures_exists(connection, cursor, tradedate):
                 request_url = (
                     f'http://iss.moex.com/iss/history/engines/futures/markets/forts/'
-                    f'securities.json?date={tradedate.strftime("%Y-%m-%d")}&assetcode={tiker}'
+                    f'securities.json?date={tradedate.strftime("%Y-%m-%d")}&assetcode={ticker}'
                 )
                 print(f'{request_url=}')
                 iss = apimoex.ISSClient(session, request_url, arguments)
@@ -103,8 +103,8 @@ def get_future_date_results(tradedate: date, tiker: str):
 
 
 if __name__ == '__main__':  # Точка входа при запуске этого скрипта
-    tiker: str = 'RTS'
-    path_db: Path = Path(fr'c:\Users\Alkor\gd\data_quote_db\{tiker}_futures_day.db')
+    ticker: str = 'RTS'
+    path_db: Path = Path(fr'c:\Users\Alkor\gd\data_quote_db\{ticker}_futures_day.db')
     start_date: date = datetime.strptime('2015-01-01', "%Y-%m-%d").date()
 
     connection: Any = sqlite3.connect(path_db, check_same_thread=True)
@@ -117,7 +117,7 @@ if __name__ == '__main__':  # Точка входа при запуске это
             sqlighter3_RTS_day.get_max_date_futures(connection, cursor), "%Y-%m-%d"
         ).date()
 
-    get_future_date_results(start_date, tiker)
+    get_future_date_results(start_date, ticker)
 
     # with connection:
     #     cursor.execute(
