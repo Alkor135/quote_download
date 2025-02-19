@@ -52,8 +52,8 @@ def get_options_date_results(tradedate: date, shortname: str):
         page = 0  # С какой записи стартовать запрос
         while True:  # В цикле отправляем запрос постранично и обрабатываем ответ
             request_url = (
-                f'http://iss.moex.com/iss/history/engines/futures/markets/options/securities.json?'
-                f'date={tradedate}&assetcode=RTS&start={page}'
+                f'http://iss.moex.com/iss/history/engines/futures/markets/options/'
+                f'securities.json?date={tradedate}&assetcode=RTS&start={page}'
             )
             print(f'{request_url=}')
             iss = apimoex.ISSClient(session, request_url, arguments)
