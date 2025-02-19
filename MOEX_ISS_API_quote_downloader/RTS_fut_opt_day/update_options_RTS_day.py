@@ -3,7 +3,6 @@
 После формирования базы удалить строк из БД командой:
 DELETE FROM Options WHERE TRADEDATE > LSTTRADE
 """
-# import sys
 from pathlib import Path
 import requests
 from datetime import date, datetime
@@ -21,16 +20,19 @@ def get_info_security(session, security: str):
     Запрашивает у MOEX информацию по инструменту
     :param session: Подключение к MOEX
     :param security: Тикер инструмента
-    :return: Дата последних торгов бара (если её нет то возвращает 2130.01.01), страйк, тип опциона, код фьючерса
+    :return: Дата последних торгов бара (если её нет то возвращает 2130.01.01),
+    страйк, тип опциона, код фьючерса
     """
     security_info = apimoex.find_security_description(session, security)
     df = pd.DataFrame(security_info)  # Полученную информацию по тикеру в DF
     name_lst = list(df['name'])
     if 'LSTTRADE' in name_lst:
         row_lst = ['NAME', 'LSTTRADE', 'OPTIONTYPE', 'STRIKE']  # Список необходимых строк из DF
-        # Меняем значение в ячейке ['NAME', 'value'] на конец строки 'value', где прописан код фьючерса
-        df.loc[df[df['name'] == 'NAME'].index, 'value'] = list(df.loc[df[df['name'] == 'NAME'].index]['value'])[
-            0].split().pop()
+        # Меняем значение в ячейке ['NAME', 'value'] на конец строки 'value',
+        # где прописан код фьючерса
+        df.loc[df[df['name'] == 'NAME'].index, 'value'] = list(
+            df.loc[df[df['name'] == 'NAME'].index]['value']
+        )[0].split().pop()
         df = df[df['name'].isin(row_lst)]  # Выборка необходимых строк
         rez_lst: list = list(df.value)  # Колонку 'value' в список
         return pd.Series(rez_lst)
@@ -41,15 +43,18 @@ def get_info_security(session, security: str):
 def get_options_date_results(tradedate: date, shortname: str):
     df_rez = pd.DataFrame()
     arguments = {'securities.columns': (
-        "BOARDID, TRADEDATE, SECID, OPEN, LOW, HIGH, CLOSE, OPENPOSITIONVALUE, VALUE, VOLUME, OPENPOSITION, SETTLEPRICE"
+        "BOARDID, TRADEDATE, SECID, OPEN, LOW, HIGH, CLOSE, OPENPOSITIONVALUE, VALUE, VOLUME, "
+        "OPENPOSITION, SETTLEPRICE"
     )}
     # arguments = {'securities.columns': ("TRADEDATE, SECID, OPENPOSITION")}
 
     with requests.Session() as session:
         page = 0  # С какой записи стартовать запрос
         while True:  # В цикле отправляем запрос постранично и обрабатываем ответ
-            request_url = (f'http://iss.moex.com/iss/history/engines/futures/markets/options/securities.json?'
-                           f'date={tradedate}&assetcode=RTS&start={page}')
+            request_url = (
+                f'http://iss.moex.com/iss/history/engines/futures/markets/options/securities.json?'
+                f'date={tradedate}&assetcode=RTS&start={page}'
+            )
             print(f'{request_url=}')
             iss = apimoex.ISSClient(session, request_url, arguments)
             data = iss.get()
@@ -59,7 +64,8 @@ def get_options_date_results(tradedate: date, shortname: str):
                 break
             else:
                 df = df[["TRADEDATE", "SECID", "OPENPOSITION"]]  # Оставляем нужные поля
-                # df = df.drop(columns=['BOARDID', 'SETTLEPRICEDAY', 'WAPRICE'])  # Удаляем не нужные поля
+                # Удаляем не нужные поля
+                # df = df.drop(columns=['BOARDID', 'SETTLEPRICEDAY', 'WAPRICE'])
                 # Создаем новые колонки 'NAME', 'LSTTRADE', 'OPTIONTYPE', 'STRIKE' и заполняем
                 df[['NAME', 'LSTTRADE', 'OPTIONTYPE', 'STRIKE']] = df.apply(
                     lambda x: get_info_security(session, x['SECID']), axis=1)
@@ -68,12 +74,14 @@ def get_options_date_results(tradedate: date, shortname: str):
                 df["LSTTRADE"] = pd.to_datetime(df["LSTTRADE"])
                 # # Преобразуем указанные колонки в тип "дата"
                 # df[["LSTTRADE", "TRADEDATE"]] = df[["LSTTRADE", "TRADEDATE"]].apply(pd.to_datetime)
-                # Оставляем только строки, где дата экспирации опциона больше даты бара фьючерса(исключаем ОИ=0)
+                # Оставляем только строки, где дата экспирации опциона больше даты бара фьючерса
+                # (исключаем ОИ=0)
                 df = df.loc[df['LSTTRADE'] > tradedate]
                 df = df.loc[df['NAME'] == shortname]  # Выбор опционов текущего базового актива
                 # Заполняем пропущенные значения в столбце OPENPOSITION значением 0.0
                 df['OPENPOSITION'] = df['OPENPOSITION'].fillna(0.0)
-                # df = df[df['LSTTRADE'] == df['LSTTRADE'].min()]  # Выборка строк с минимальной датой
+                # Выборка строк с минимальной датой
+                # df = df[df['LSTTRADE'] == df['LSTTRADE'].min()]
                 # df_rez = pd.concat([df_rez, df]).reset_index(drop=True)  # Слияние DF
                 df_rez = pd.concat([df_rez.dropna(), df.dropna()]).reset_index(drop=True)
                 print(df_rez.to_string(max_rows=6, max_cols=18), '\n')
@@ -126,10 +134,20 @@ if __name__ == '__main__':  # Точка входа при запуске это
     # print(type(df_tradedate.TRADEDATE[0]))
 
     df = pd.DataFrame()
-    for row in df_tradedate.itertuples():  # Перебираем даты для запроса торгуемых опционов на эту дату
+    # Перебираем даты для запроса торгуемых опционов на эту дату
+    for row in df_tradedate.itertuples():
         print(f'\nИндекс={row.Index}, TRADEDATE={row.TRADEDATE}, SHORTNAME={row.SHORTNAME}')
         # Нет записи с такой датой
         if not sqlighter3_RTS_day.tradedate_options_exists(connection, cursor, row.TRADEDATE):
-            df = get_options_date_results(row.TRADEDATE, row.SHORTNAME)  # Получаем DF по опционам от МОЕХ
+            # Получаем DF по опционам от МОЕХ
+            df = get_options_date_results(row.TRADEDATE, row.SHORTNAME)
             # print(df.to_string(max_rows=10, max_cols=20), '\n')
-            add_row_options_table(connection, cursor, df)  # Записываем в БД построчно DF по опционам
+            # Записываем в БД построчно DF по опционам
+            add_row_options_table(connection, cursor, df)
+
+    # Выполняем команду VACUUM
+    cursor.execute("VACUUM;")
+
+    # Закрываем курсор и соединение
+    cursor.close()
+    connection.close()

@@ -51,8 +51,10 @@ def get_info_future(session: Any, security: str):
 def get_future_date_results(tradedate: date, tiker: str):
     today_date = datetime.now().date()  # Текущая дата и время
 
-    arguments = {'securities.columns': ("BOARDID, TRADEDATE, SECID, OPEN, LOW, HIGH, CLOSE, OPENPOSITIONVALUE, VALUE, "
-                                        "VOLUME, OPENPOSITION, SETTLEPRICE")}
+    arguments = {'securities.columns': (
+        "BOARDID, TRADEDATE, SECID, OPEN, LOW, HIGH, CLOSE, OPENPOSITIONVALUE, VALUE, "
+        "VOLUME, OPENPOSITION, SETTLEPRICE"
+    )}
 
     with requests.Session() as session:
         # print(f'{trade_date=}, {start_date=}')
@@ -60,8 +62,10 @@ def get_future_date_results(tradedate: date, tiker: str):
         while tradedate != today_date:
             # Нет записи с такой датой
             if not sqlighter3_RTS_day.tradedate_futures_exists(connection, cursor, tradedate):
-                request_url = (f'http://iss.moex.com/iss/history/engines/futures/markets/forts/securities.json?'
-                               f'date={tradedate.strftime("%Y-%m-%d")}&assetcode={tiker}')
+                request_url = (
+                    f'http://iss.moex.com/iss/history/engines/futures/markets/forts/'
+                    f'securities.json?date={tradedate.strftime("%Y-%m-%d")}&assetcode={tiker}'
+                )
                 print(f'{request_url=}')
                 iss = apimoex.ISSClient(session, request_url, arguments)
                 data = iss.get()
@@ -69,9 +73,11 @@ def get_future_date_results(tradedate: date, tiker: str):
                 # print(df.to_string(max_rows=20, max_cols=15), '\n')
                 if len(df) != 0:  # Если полученный ответ не нулевой, чтобы исключить выходные дни
                     # Создаем новые колонки 'SHORTNAME', 'LSTTRADE' и заполняем
-                    df[['SHORTNAME', 'LSTTRADE']] = df.apply(lambda x: get_info_future(session, x['SECID']), axis=1)
+                    df[['SHORTNAME', 'LSTTRADE']] = df.apply(
+                        lambda x: get_info_future(session, x['SECID']), axis=1
+                    )
                     df["LSTTRADE"] = pd.to_datetime(df["LSTTRADE"]).dt.date
-                    # Оставляем только строки, где дата экспирации больше даты бара (исключаем ОИ=0)
+                    # Оставляем только строки, где дата экспирации больше даты бара(исключаем ОИ=0)
                     df = df.loc[df['LSTTRADE'] > tradedate]
                     # Удаление строк с пустыми OPEN, LOW, HIGH, CLOSE
                     df.dropna(subset=['OPEN', 'LOW', 'HIGH', 'CLOSE'], inplace=True)
@@ -81,12 +87,16 @@ def get_future_date_results(tradedate: date, tiker: str):
                     print(df.to_string(max_rows=20, max_cols=15))
                     # print(df.loc[0]['OPENPOSITION'])
                     if len(df) == 1:  # Если одна строка в DF
-                        if not df['OPEN'].isnull().values.any():  # Проверка на пустые значения поля 'OPEN'
+                        # Проверка на пустые значения поля 'OPEN'
+                        if not df['OPEN'].isnull().values.any():
                             # Запись строки в БД
-                            sqlighter3_RTS_day.add_tradedate_future(connection, cursor, df.loc[0]['TRADEDATE'],
-                                df.loc[0]['SECID'], float(df.loc[0]['OPEN']), float(df.loc[0]['LOW']),
-                                float(df.loc[0]['HIGH']), float(df.loc[0]['CLOSE']), int(df.loc[0]['VOLUME']),
-                                int(df.loc[0]['OPENPOSITION']), df.loc[0]['SHORTNAME'], df.loc[0]['LSTTRADE'])
+                            sqlighter3_RTS_day.add_tradedate_future(
+                                connection, cursor, df.loc[0]['TRADEDATE'], df.loc[0]['SECID'],
+                                float(df.loc[0]['OPEN']), float(df.loc[0]['LOW']),
+                                float(df.loc[0]['HIGH']), float(df.loc[0]['CLOSE']),
+                                int(df.loc[0]['VOLUME']), int(df.loc[0]['OPENPOSITION']),
+                                df.loc[0]['SHORTNAME'], df.loc[0]['LSTTRADE']
+                            )
                             print('Строка записана в БД', '\n')
             # Увеличиваем дату на один день
             tradedate += timedelta(days=1)
@@ -100,9 +110,18 @@ if __name__ == '__main__':  # Точка входа при запуске это
     connection: Any = sqlite3.connect(path_db, check_same_thread=True)
     cursor: Any = connection.cursor()
 
-    if sqlighter3_RTS_day.non_empty_table_futures(connection, cursor):  # Если таблица Futures не пустая
+    # Если таблица Futures не пустая
+    if sqlighter3_RTS_day.non_empty_table_futures(connection, cursor):
         # Меняем стартовую дату на дату последней записи
-        start_date = datetime.strptime(sqlighter3_RTS_day.get_max_date_futures(connection, cursor),
-                                       "%Y-%m-%d").date()
+        start_date = datetime.strptime(
+            sqlighter3_RTS_day.get_max_date_futures(connection, cursor), "%Y-%m-%d"
+        ).date()
 
     get_future_date_results(start_date, tiker)
+
+    # Выполняем команду VACUUM
+    cursor.execute("VACUUM;")
+
+    # Закрываем курсор и соединение
+    cursor.close()
+    connection.close()
