@@ -87,7 +87,7 @@ def get_future_date_results(tradedate, tiker, session):
 
         if len(df) != 0:  # Если полученный ответ не нулевой, чтобы исключить выходные дни
             cur_ticker = df.loc[0]['SECID']  # Тикер текущего фьючерса
-            cur_lasttrade = df.loc[0]['LSTTRADE']  # Тикер текущего фьючерса
+            cur_lasttrade = df.loc[0]['LSTTRADE']  # Последний день торгов текущего фьючерса
             data = apimoex.get_market_candles(
                 session=session,
                 security=cur_ticker,
