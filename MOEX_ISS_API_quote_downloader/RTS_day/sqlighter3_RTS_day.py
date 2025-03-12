@@ -84,7 +84,7 @@ if __name__ == '__main__':  # Создание БД, если её не суще
     # Настройка базы данных
     tiker: str = 'RTS'
     path_bd: Path = Path(r'c:\Users\Alkor\gd\data_quote_db')  # Папка с БД
-    file_bd: str = f'{tiker}_futures_day_full.db'
+    file_bd: str = f'{tiker}_futures_day.db'
 
     if not path_bd.is_dir():  # Если не существует папка под БД
         try:
