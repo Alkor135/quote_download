@@ -1,4 +1,6 @@
-import time
+"""
+
+"""
 import pandas as pd
 import requests
 
@@ -17,15 +19,9 @@ data = [{k : r[i] for i, k in enumerate(j['history']['columns'])} for r in j['hi
 df = pd.DataFrame(data).dropna()
 print(df)
 
-# time.sleep(2)
-# j = requests.get('http://iss.moex.com/iss/engines/stock/markets/shares/securities/YNDX/candles.json?from=2023-05-25&till=2023-09-01&interval=24').json()
-# data = [{k : r[i] for i, k in enumerate(j['candles']['columns'])} for r in j['candles']['data']]
-# frame = pd.DataFrame(data)
-# print(frame)
-# plt.plot(list(frame['close']))
-# plt.savefig("shares.png")
+print()
 
 j = requests.get('https://iss.moex.com/iss/securities/RIH5.json').json()
 data = [{k : r[i] for i, k in enumerate(j['description']['columns'])} for r in j['description']['data']]
-df = pd.DataFrame(data)  # .dropna()
+df = pd.DataFrame(data)
 print(df)
