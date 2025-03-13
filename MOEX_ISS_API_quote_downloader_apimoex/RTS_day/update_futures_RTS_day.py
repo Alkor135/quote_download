@@ -71,7 +71,7 @@ def get_future_date_results(tradedate: date, ticker: str):
                 iss = apimoex.ISSClient(session, request_url, arguments)
                 data = iss.get()
                 df = pd.DataFrame(data['history'])
-                # print(df.to_string(max_rows=20, max_cols=15), '\n')
+                print(df.to_string(max_rows=20, max_cols=15), '\n')
                 if len(df) != 0:  # Если полученный ответ не нулевой, чтобы исключить выходные дни
                     # Создаем новые колонки 'SHORTNAME', 'LSTTRADE' и заполняем
                     df[['SHORTNAME', 'LSTTRADE']] = df.apply(
