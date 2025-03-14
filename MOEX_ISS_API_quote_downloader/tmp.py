@@ -14,7 +14,10 @@ j = requests.get('https://iss.moex.com/iss/securities/YNDX/aggregates.json?date=
 data = [{k : r[i] for i, k in enumerate(j['aggregates']['columns'])} for r in j['aggregates']['data']]
 print(pd.DataFrame(data), '\n')
 
-j = requests.get('https://iss.moex.com/iss/history/engines/futures/markets/forts/securities.json?date=2025-02-19&assetcode=RTS').json()
+j = requests.get(
+    f'https://iss.moex.com/iss/history/engines/futures/markets/forts/securities.json?'
+    f'date=2025-02-19&assetcode=RTS'
+    ).json()
 data = [{k : r[i] for i, k in enumerate(j['history']['columns'])} for r in j['history']['data']]
 df = pd.DataFrame(data).dropna()
 print(df, '\n')
