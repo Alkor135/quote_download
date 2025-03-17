@@ -64,7 +64,7 @@ def get_future_date_results(tradedate: date, ticker: str):
             # Нет записи с такой датой
             if not sqlighter3_RTS_day.tradedate_futures_exists(connection, cursor, tradedate):
                 request_url = (
-                    f'http://iss.moex.com/iss/history/engines/futures/markets/forts/'
+                    f'https://iss.moex.com/iss/history/engines/futures/markets/forts/'
                     f'securities.json?date={tradedate.strftime("%Y-%m-%d")}&assetcode={ticker}'
                 )
                 print(f'{request_url=}')
