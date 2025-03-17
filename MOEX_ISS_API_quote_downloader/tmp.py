@@ -26,3 +26,14 @@ j = requests.get('https://iss.moex.com/iss/securities/RIH5.json').json()
 data = [{k : r[i] for i, k in enumerate(j['description']['columns'])} for r in j['description']['data']]
 df = pd.DataFrame(data)
 print(df, '\n')
+
+url = (
+    f'https://iss.moex.com/iss/history/engines/futures/markets/options/'
+    f'securities.json?date=2025-02-19&assetcode=RTS&start=0'
+)
+print(f'{url=}')
+j = requests.get(url).json()
+data = [{k: r[i] for i, k in enumerate(j['history']['columns'])} for r in
+        j['history']['data']]
+df = pd.DataFrame(data)
+print(df)
