@@ -5,7 +5,7 @@ DELETE FROM Options WHERE TRADEDATE > LSTTRADE
 """
 from pathlib import Path
 import requests
-from datetime import date, datetime
+from datetime import timedelta, datetime
 import pandas as pd
 import sqlite3
 import sqlighter3_RTS_day
@@ -107,19 +107,27 @@ def add_row_options_table(connection, cursor, df):
 if __name__ == '__main__':
     ticker = 'RTS'
     path_db = Path(r'c:\Users\Alkor\gd\data_quote_db\RTS_futures_options_day_2014.db')
-    start_date = datetime.strptime('2014-01-01', "%Y-%m-%d").date()
+    start_date = datetime.strptime('2021-01-01', "%Y-%m-%d").date()
 
     connection = sqlite3.connect(path_db, check_same_thread=True)
     cursor = connection.cursor()
 
+    # Удаляем последние записи из БД с опционами
     cursor.execute("SELECT MAX(TRADEDATE) FROM Options")
     max_trade_date = cursor.fetchone()[0]
     if max_trade_date:
         cursor.execute("DELETE FROM Options WHERE TRADEDATE = ?", (max_trade_date,))
         connection.commit()
 
+    # Если таблица Options не пустая
+    if sqlighter3_RTS_day.non_empty_table_options(connection, cursor):
+        # Меняем стартовую дату на дату последней записи плюс 1 день
+        start_date = datetime.strptime(sqlighter3_RTS_day.get_max_date_options(connection, cursor),
+                                       "%Y-%m-%d").date() + timedelta(days=1)
+
     df_tradedate = sqlighter3_RTS_day.get_tradedate_future_update(connection, start_date)
     df_tradedate.sort_values(by='TRADEDATE', inplace=True)
+    # print(df_tradedate)
 
     with requests.Session() as session:
         for row in df_tradedate.itertuples():

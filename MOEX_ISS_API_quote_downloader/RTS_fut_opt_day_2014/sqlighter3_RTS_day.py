@@ -45,6 +45,12 @@ def non_empty_table_futures(connection, cursor):
         return cursor.execute("SELECT count(*) FROM (select 1 from Futures limit 1)").fetchall()[0][0]
 
 
+def non_empty_table_options(connection, cursor):
+    """Проверяем, есть ли записи в таблице 'Futures' в базе"""
+    with connection:
+        return cursor.execute("SELECT count(*) FROM (select 1 from Options limit 1)").fetchall()[0][0]
+
+
 def tradedate_futures_exists(connection, cursor, tradedate):
     """Проверяем, есть ли дата в таблице 'Futures' в базе"""
     with connection:
@@ -113,8 +119,14 @@ def get_max_date_futures(connection, cursor):
         return cursor.execute('SELECT MAX (TRADEDATE) FROM Futures').fetchall()[0][0]
 
 
+def get_max_date_options(connection, cursor):
+    """ Получение максимальной даты по опционам """
+    with connection:
+        return cursor.execute('SELECT MAX (TRADEDATE) FROM Options').fetchall()[0][0]
+
+
 def delete_options_bag(connection, cursor):
-    """ Удаление опционов где дата торгов больше даты экспирации опционов """
+    """ Удаление опционов, где дата торгов больше даты экспирации опционов """
     with connection:
         return cursor.execute('DELETE FROM Options WHERE TRADEDATE > LSTTRADE')
 

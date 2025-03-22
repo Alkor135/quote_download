@@ -104,7 +104,7 @@ if __name__ == '__main__':  # Точка входа при запуске это
     connection: Any = sqlite3.connect(path_db, check_same_thread=True)
     cursor: Any = connection.cursor()
 
-    # Удаляем последние записи из БД
+    # Удаляем последние записи из БД с опционами
     cursor.execute("SELECT MAX(TRADEDATE) FROM Options")
     max_trade_date = cursor.fetchone()[0]
     if max_trade_date:
