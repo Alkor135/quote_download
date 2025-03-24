@@ -44,7 +44,7 @@ def get_info_future(session, security):
 
 def get_future_date_results(session, tradedate, ticker, connection, cursor):
     today_date = datetime.now().date()  # Текущая дата и время
-    while tradedate < today_date:
+    while tradedate <= today_date:
         # Нет записи с такой датой
         if not sqlighter3_RTS_day.tradedate_futures_exists(connection, cursor, tradedate):
             url = (
@@ -96,15 +96,15 @@ if __name__ == '__main__':  # Точка входа при запуске это
     connection = sqlite3.connect(path_db, check_same_thread=True)
     cursor = connection.cursor()
 
-    # Удаляем последнюю запись из БД
-    cursor.execute("SELECT MAX(TRADEDATE) FROM Futures")
-    max_trade_date = cursor.fetchone()[0]
-    if max_trade_date:
-        cursor.execute("DELETE FROM Futures WHERE TRADEDATE = ?", (max_trade_date,))
-        connection.commit()
-
     # Если таблица Futures не пустая
     if sqlighter3_RTS_day.non_empty_table_futures(connection, cursor):
+        # Удаляем последнюю запись из БД
+        cursor.execute("SELECT MAX(TRADEDATE) FROM Futures")
+        max_trade_date = cursor.fetchone()[0]
+        if max_trade_date:
+            cursor.execute("DELETE FROM Futures WHERE TRADEDATE = ?", (max_trade_date,))
+            connection.commit()
+
         # Меняем стартовую дату на дату последней записи
         start_date = datetime.strptime(sqlighter3_RTS_day.get_max_date_futures(connection, cursor),
                                        "%Y-%m-%d").date() + timedelta(days=1)

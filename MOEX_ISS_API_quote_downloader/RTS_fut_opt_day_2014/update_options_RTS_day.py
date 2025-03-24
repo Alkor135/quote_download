@@ -1,7 +1,5 @@
 """
 Получение исторических данных по опционам RTS с MOEX ISS API
-После формирования базы удалить строки из БД командой:
-DELETE FROM Options WHERE TRADEDATE > LSTTRADE
 """
 from pathlib import Path
 import requests
@@ -112,15 +110,14 @@ if __name__ == '__main__':
     connection = sqlite3.connect(path_db, check_same_thread=True)
     cursor = connection.cursor()
 
-    # Удаляем последние записи из БД с опционами
-    cursor.execute("SELECT MAX(TRADEDATE) FROM Options")
-    max_trade_date = cursor.fetchone()[0]
-    if max_trade_date:
-        cursor.execute("DELETE FROM Options WHERE TRADEDATE = ?", (max_trade_date,))
-        connection.commit()
-
     # Если таблица Options не пустая
     if sqlighter3_RTS_day.non_empty_table_options(connection, cursor):
+        # Удаляем последние записи из БД с опционами
+        cursor.execute("SELECT MAX(TRADEDATE) FROM Options")
+        max_trade_date = cursor.fetchone()[0]
+        if max_trade_date:
+            cursor.execute("DELETE FROM Options WHERE TRADEDATE = ?", (max_trade_date,))
+            connection.commit()
         # Меняем стартовую дату на дату последней записи плюс 1 день
         start_date = datetime.strptime(sqlighter3_RTS_day.get_max_date_options(connection, cursor),
                                        "%Y-%m-%d").date() + timedelta(days=1)
