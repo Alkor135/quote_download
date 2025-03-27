@@ -128,6 +128,13 @@ if __name__ == '__main__':  # Точка входа при запуске это
 
     # Если таблица Futures не пустая
     if sqlighter3_RTS_minute.non_empty_table_futures(connection, cursor):
+        # Удаляем последние записи из БД с минутками.
+        cursor.execute("SELECT MAX(TRADEDATE) FROM Minute")
+        max_trade_date = cursor.fetchone()[0]
+        if max_trade_date:
+            cursor.execute("DELETE FROM Minute WHERE TRADEDATE = ?", (max_trade_date,))
+            connection.commit()
+
         # Меняем стартовую дату на дату последней записи +1 день
         tradedate = datetime.strptime(
             sqlighter3_RTS_minute.get_max_date_futures(connection, cursor),
@@ -139,7 +146,7 @@ if __name__ == '__main__':  # Точка входа при запуске это
     with requests.Session() as session:
         # print(f'{trade_date=}, {start_date=}')
 
-        while tradedate != today_date:
+        while tradedate <= today_date:
             get_future_date_results(tradedate, tiker, session)
             tradedate += timedelta(days=1)
             # print(df.to_string(max_rows=20, max_cols=15), '\n')
