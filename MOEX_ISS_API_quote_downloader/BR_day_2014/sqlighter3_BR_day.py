@@ -68,7 +68,7 @@ def get_max_lsttrade(connection, cursor):
 
 if __name__ == '__main__':  # Создание БД, если её не существует
     # Настройка базы данных
-    ticker: str = 'RTS'
+    ticker: str = 'BR'
     path_bd: Path = Path(r'c:\Users\Alkor\gd\data_quote_db')  # Папка с БД
     file_bd: str = f'{ticker}_day_2014.db'
 

@@ -202,7 +202,7 @@ def get_future_date_results(
 
 
 if __name__ == '__main__':  # Точка входа при запуске этого скрипта
-    ticker = 'RTS'
+    ticker = 'BR'
     path_db = Path(fr'c:\Users\Alkor\gd\data_quote_db\{ticker}_day_2014.db')
     start_date = datetime.strptime('2014-01-01', "%Y-%m-%d").date()
 
