@@ -176,7 +176,8 @@ def get_future_date_results(
 
             # Фильтруем строки начиная с 19:00 прошлого торгового дня
             df_filtered = df_min[df_min['begin'] >= start_time]
-            print(df_filtered)
+            # print(df_filtered)
+            print(df_filtered.to_string(max_rows=10, max_cols=20))
         else:
             print("Прошлый торговый день не найден.")
 
