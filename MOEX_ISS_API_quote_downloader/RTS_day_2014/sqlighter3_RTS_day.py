@@ -43,18 +43,27 @@ def tradedate_futures_exists(connection, cursor, tradedate):
 
 
 def add_tradedate_future(connection, cursor, tradedate, secid, open, low, high, close, lsttrade):
-    """Добавляет строку в таблицу Futures """
-    with connection:
-        return cursor.execute(
-            "INSERT INTO `Futures` (`TRADEDATE`, `SECID`, `OPEN`, `LOW`, `HIGH`, `CLOSE`, `LSTTRADE`) VALUES(?,?,?,?,?,?,?)",
-            (tradedate, secid, open, low, high, close, lsttrade)
+    """Добавляет строку в таблицу Futures"""
+    try:
+        with connection:
+            return cursor.execute(
+                "INSERT INTO `Futures` (`TRADEDATE`, `SECID`, `OPEN`, `LOW`, `HIGH`, `CLOSE`, `LSTTRADE`) VALUES(?,?,?,?,?,?,?)",
+                (tradedate, secid, open, low, high, close, lsttrade)
             )
+    except sqlite3.IntegrityError as e:
+        print(f"Ошибка вставки данных в таблицу Futures: {e}")
 
 
 def get_max_date_futures(connection, cursor):
     """ Получение максимальной даты по фьючерсам """
     with connection:
         return cursor.execute('SELECT MAX (TRADEDATE) FROM Futures').fetchall()[0][0]
+    
+
+def get_max_lsttrade(connection, cursor):
+    """ Получение максимальной даты последних торгов по фьючерсам """
+    with connection:
+        return cursor.execute('SELECT MAX (LSTTRADE) FROM Futures').fetchall()[0][0]
 
 
 if __name__ == '__main__':  # Создание БД, если её не существует

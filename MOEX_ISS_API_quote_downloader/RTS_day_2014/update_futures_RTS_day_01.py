@@ -42,7 +42,22 @@ def get_info_future(session, security):
     return pd.Series([shortname, lsttrade])  # Гарантируем возврат 2 значений
 
 
-def get_future_date_results(session, tradedate, ticker, connection, cursor):
+def get_future_date_results(
+    session: requests.Session, 
+    tradedate: datetime.date, 
+    ticker: str, 
+    connection: sqlite3.Connection, 
+    cursor: sqlite3.Cursor
+    ) -> None:
+    """
+    Получает данные по фьючерсам с MOEX ISS API и сохраняет их в базу данных.
+
+    :param session: Сессия requests для выполнения HTTP-запросов.
+    :param tradedate: Дата начала загрузки данных.
+    :param ticker: Тикер инструмента (например, 'RTS').
+    :param connection: Соединение с базой данных SQLite.
+    :param cursor: Курсор для выполнения SQL-запросов.
+    """
     today_date = datetime.now().date()  # Текущая дата и время
     while tradedate <= today_date:
         # Нет записи с такой датой
@@ -82,12 +97,21 @@ def get_future_date_results(session, tradedate, ticker, connection, cursor):
                     float(df.loc[0]['HIGH']), float(df.loc[0]['CLOSE']),
                     df.loc[0]['LSTTRADE']
                 )
+                df = df.drop([
+                    'OPENPOSITIONVALUE', 'VALUE', 'SETTLEPRICE', 'SWAPRATE', 'WAPRICE', 
+                    'SETTLEPRICEDAY', 'NUMTRADES', 'SHORTNAME', 'CHANGE', 'QTY'
+                    ], axis=1)
                 print(df.to_string(max_rows=5, max_cols=20))
                 print('Строка записана в БД', '\n')
         tradedate += timedelta(days=1)
 
     # Создание строки из минуток ------------------------------------------------------------------
-    if sqlighter3_RTS_day.get_max_date_futures(connection, cursor) != today_date:
+    print(type(sqlighter3_RTS_day.get_max_date_futures(connection, cursor)))
+    print(type(today_date))
+
+    end_date = datetime.strptime(sqlighter3_RTS_day.get_max_date_futures(connection, cursor), "%Y-%m-%d").date()
+
+    if end_date != today_date:
         url = (
             f"https://iss.moex.com/iss/engines/futures/markets/forts/securities.json"
             )
@@ -136,6 +160,11 @@ def get_future_date_results(session, tradedate, ticker, connection, cursor):
 
         print(df_min)
 
+        required_columns = ['begin', 'high', 'low', 'open', 'close']
+        if not all(col in df_min.columns for col in required_columns):
+            print("Некоторые необходимые столбцы отсутствуют в данных. Пропускаем обработку.")
+            return
+
         # Минутные данные с 19:00 прошлого торгового дня ------------------------------------------
         df_min['begin'] = pd.to_datetime(df_min['begin'])  # Преобразуем колонку begin в формат datetime
         # Находим прошлый торговый день
@@ -158,11 +187,17 @@ def get_future_date_results(session, tradedate, ticker, connection, cursor):
         first_open = df_filtered['open'].iloc[0]  # Первое значение столбца 'open'
         last_close = df_filtered['close'].iloc[-1]  # Последнее значение столбца 'close'
 
+        # print(df.loc[0]['LASTTRADEDATE'])
+
         sqlighter3_RTS_day.add_tradedate_future(
-            connection, cursor, today_date, secid,
+            connection, cursor, 
+            today_date.date(), 
+            secid,
             float(first_open), float(min_low),
             float(max_high), float(last_close),
-            df.loc[0]['LASTTRADEDATE']
+            # df.loc[0]['LASTTRADEDATE']
+            # today_date
+            sqlighter3_RTS_day.get_max_lsttrade(connection, cursor)
             )
 
 
