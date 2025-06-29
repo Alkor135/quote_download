@@ -90,7 +90,7 @@ def get_future_date_results(session, tradedate, ticker, connection, cursor):
 
 if __name__ == '__main__':  # Точка входа при запуске этого скрипта
     ticker = 'Si'
-    path_db = Path(fr'c:\Users\Alkor\gd\data_quote_db\{ticker}_futures_options_day_2014.db')
+    path_db = Path(fr'c:\Users\Alkor\gd\data_quote_db\{ticker}_day_2014.db')
     start_date = datetime.strptime('2014-01-01', "%Y-%m-%d").date()
 
     connection = sqlite3.connect(path_db, check_same_thread=True)
