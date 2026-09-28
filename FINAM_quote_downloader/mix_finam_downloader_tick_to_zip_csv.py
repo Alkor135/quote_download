@@ -1,8 +1,8 @@
-r"""Скачивает тиковые сделки RTS с Финама в отдельный CSV внутри ZIP за каждый день.
+r"""Скачивает тиковые сделки MIX с Финама в отдельный CSV внутри ZIP за каждый день.
 
 Примеры запуска из корня проекта quote_download:
-    .venv\Scripts\python.exe FINAM_quote_downloader\rts_finam_downloader_tick_to_zip_csv.py
-    .venv\Scripts\python.exe FINAM_quote_downloader\rts_finam_downloader_tick_to_zip_csv.py --start 2022-02-11 --end 2022-02-11 --output data\finam_probe --timeout 15 --attempts 1
+    .venv\Scripts\python.exe FINAM_quote_downloader\mix_finam_downloader_tick_to_zip_csv.py
+    .venv\Scripts\python.exe FINAM_quote_downloader\mix_finam_downloader_tick_to_zip_csv.py --start 2022-02-11 --end 2022-02-11 --output data\finam_mix_probe --timeout 15 --attempts 1
 
 Без аргументов используются настройки внизу файла. Гостевой токен сайта
 получается автоматически без логина и пароля. Переменная FINAM_TOKEN
@@ -247,12 +247,12 @@ class DownloadFinam:
 
 
 # Основные настройки для запуска кнопкой Run в VS Code.
-dir_data = r"C:\data_quote\data_finam_RTS_tick_zip"
-ticker = "SPFB.RTS"
+dir_data = r"C:\data_quote\data_finam_MIX_tick_zip"
+ticker = "SPFB.MIX"
 market = 14
 period = 1
 daft = 9
-start_date_range = datetime.date(2025, 1, 1)
+start_date_range = datetime.date(2022, 1, 1)
 end_date_range = datetime.date.today() - datetime.timedelta(days=1)
 
 
