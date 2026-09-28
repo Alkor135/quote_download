@@ -109,7 +109,9 @@ def get_future_date_results(
     print(type(sqlighter3_RTS_day.get_max_date_futures(connection, cursor)))
     print(type(today_date))
 
-    end_date = datetime.strptime(sqlighter3_RTS_day.get_max_date_futures(connection, cursor), "%Y-%m-%d").date()
+    end_date = datetime.strptime(
+        sqlighter3_RTS_day.get_max_date_futures(connection, cursor), "%Y-%m-%d"
+    ).date()
 
     if end_date != today_date:
         url = (
@@ -122,7 +124,9 @@ def get_future_date_results(
                 j['securities']['data']]
         
         # DF со всеми фьючерсами на сегодня -------------------------------------------------------
-        df = pd.DataFrame(data).drop(['BOARDID', 'SECNAME', 'DECIMALS', 'LOTVOLUME', 'PREVOPENPOSITION'], axis=1)
+        df = pd.DataFrame(data).drop([
+            'BOARDID', 'SECNAME', 'DECIMALS', 'LOTVOLUME', 'PREVOPENPOSITION'
+        ], axis=1)
 
         # DF со всеми фьючерсами RTS --------------------------------------------------------------
         today_date = pd.to_datetime(today_date)  # Преобразование today_date в тип datetime
@@ -140,7 +144,8 @@ def get_future_date_results(
         page = 0
         while True:
             url = (
-                f"https://iss.moex.com/iss/engines/futures/markets/forts/securities/{secid}/candles.json?interval=1&start={page}"
+                f"https://iss.moex.com/iss/engines/futures/markets/forts/securities/{secid}/"
+                f"candles.json?interval=1&start={page}"
             )
             print(f'{url=}')
             j = request_moex(session, url)
@@ -216,7 +221,9 @@ if __name__ == '__main__':  # Точка входа при запуске это
         cursor.execute("SELECT MAX(TRADEDATE) FROM Futures")
         max_trade_date = cursor.fetchone()[0]
         if max_trade_date:
-            cursor.execute("DELETE FROM Futures WHERE TRADEDATE = ?", (max_trade_date,))
+            cursor.execute(
+                "DELETE FROM Futures WHERE TRADEDATE = ?", (max_trade_date,)
+            )
             connection.commit()
 
         # Меняем стартовую дату на дату последней записи плюс 1 день
