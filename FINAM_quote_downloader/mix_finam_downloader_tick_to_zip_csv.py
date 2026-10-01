@@ -3,6 +3,8 @@ r"""Скачивает тиковые сделки MIX с Финама в отд
 Примеры запуска из корня проекта quote_download:
     .venv\Scripts\python.exe FINAM_quote_downloader\mix_finam_downloader_tick_to_zip_csv.py
     .venv\Scripts\python.exe FINAM_quote_downloader\mix_finam_downloader_tick_to_zip_csv.py --start 2022-02-11 --end 2022-02-11 --output data\finam_mix_probe --timeout 15 --attempts 1
+    .\.venv\Scripts\python.exe .\FINAM_quote_downloader\mix_finam_downloader_tick_to_zip_csv.py
+    .\.venv\Scripts\python.exe .\FINAM_quote_downloader\rts_finam_downloader_tick_to_zip_csv.py
 
 Без аргументов используются настройки внизу файла. Гостевой токен сайта
 получается автоматически без логина и пароля. Переменная FINAM_TOKEN
