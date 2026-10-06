@@ -281,7 +281,7 @@ ticker = "SPFB.MIX"
 market = 14
 period = 1
 daft = 9
-start_date_range = datetime.date(2022, 1, 1)
+start_date_range = datetime.date(2026, 10, 1)
 end_date_range = datetime.date.today() - datetime.timedelta(days=1)
 
 
