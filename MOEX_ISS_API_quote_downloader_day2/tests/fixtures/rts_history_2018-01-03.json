@@ -1,0 +1,24 @@
+{
+  "history": {
+    "columns": [
+      "BOARDID", "TRADEDATE", "SECID", "OPEN", "LOW", "HIGH", "CLOSE",
+      "OPENPOSITIONVALUE", "VALUE", "VOLUME", "OPENPOSITION", "SETTLEPRICE",
+      "SWAPRATE", "WAPRICE", "CHANGE", "QTY", "NUMTRADES", "SHORTNAME",
+      "ASSETCODE", "SWAPRATE_CURR"
+    ],
+    "data": [
+      ["RFUD", "2018-01-03", "RIH8_2018", 116390.0, 115410.0, 118830.0, 118700.0, 49340647010.2, 27507233076.04, 203474, 362180, 118720.0, null, 117810.0, 2.0, 2, 78879, "RTS-3.18", "RTS", null],
+      ["RFUD", "2018-01-03", "RIH9", null, null, null, null, 800250.54, null, null, 6, 116230.0, null, null, null, null, 0, "RTS-3.19", "RTS", null],
+      ["RFUD", "2018-01-03", "RIM8_2018", 115430.0, 115430.0, 117500.0, 117500.0, 443329029.84, 31294801.07, 234, 3288, 117500.0, null, 116553.0, 2.17, 2, 72, "RTS-6.18", "RTS", null],
+      ["RFUD", "2018-01-03", "RIM9", 115000.0, 115000.0, 115000.0, 115000.0, 1327324.8, 131963.65, 1, 10, 115670.0, null, 115000.0, null, 1, 1, "RTS-6.19", "RTS", null],
+      ["RFUD", "2018-01-03", "RIU8_2018", 114000.0, 114000.0, 114000.0, 114000.0, 781246378.8, 130816.14, 1, 5970, 114040.0, null, 114000.0, 0.0, 1, 1, "RTS-9.18", "RTS", null],
+      ["RFUD", "2018-01-03", "RIU9", null, null, null, null, 4235688.96, null, null, 32, 115350.0, null, null, null, null, 0, "RTS-9.19", "RTS", null],
+      ["RFUD", "2018-01-03", "RIZ8_2018", 113670.0, 113430.0, 115990.0, 113430.0, 73411401.84, 654574.12, 5, 564, 113430.0, null, 114086.0, 0.38, 1, 5, "RTS-12.18", "RTS", null],
+      ["RFUD", "2018-01-03", "RIZ9", null, null, null, null, 259199.56, null, null, 2, 112940.0, null, null, null, null, 0, "RTS-12.19", "RTS", null]
+    ]
+  },
+  "history.cursor": {
+    "columns": ["INDEX", "TOTAL", "PAGESIZE"],
+    "data": [[0, 8, 100]]
+  }
+}

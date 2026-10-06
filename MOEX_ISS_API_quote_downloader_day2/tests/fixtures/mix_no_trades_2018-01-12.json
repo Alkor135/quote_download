@@ -1,0 +1,109 @@
+{
+  "TRADEDATE": "2018-01-12",
+  "history": [
+    {
+      "BOARDID": "RFUD",
+      "TRADEDATE": "2018-01-12",
+      "SECID": "MXH8_2018",
+      "OPEN": 227400.0,
+      "LOW": 226125.0,
+      "HIGH": 228800.0,
+      "CLOSE": 228500.0,
+      "VOLUME": 18057,
+      "OPENPOSITION": 12546,
+      "ASSETCODE": "MIX",
+      "NUMTRADES": 11712,
+      "SETTLEPRICE": 228500.0
+    },
+    {
+      "BOARDID": "RFUD",
+      "TRADEDATE": "2018-01-12",
+      "SECID": "MXM8_2018",
+      "OPEN": null,
+      "LOW": null,
+      "HIGH": null,
+      "CLOSE": null,
+      "VOLUME": null,
+      "OPENPOSITION": 38,
+      "ASSETCODE": "MIX",
+      "NUMTRADES": 0,
+      "SETTLEPRICE": 230350.0
+    },
+    {
+      "BOARDID": "RFUD",
+      "TRADEDATE": "2018-01-12",
+      "SECID": "MXU8_2018",
+      "OPEN": null,
+      "LOW": null,
+      "HIGH": null,
+      "CLOSE": null,
+      "VOLUME": null,
+      "OPENPOSITION": 12,
+      "ASSETCODE": "MIX",
+      "NUMTRADES": 0,
+      "SETTLEPRICE": 228175.0
+    },
+    {
+      "BOARDID": "RFUD",
+      "TRADEDATE": "2018-01-12",
+      "SECID": "MXZ8_2018",
+      "OPEN": null,
+      "LOW": null,
+      "HIGH": null,
+      "CLOSE": null,
+      "VOLUME": null,
+      "OPENPOSITION": null,
+      "ASSETCODE": "MIX",
+      "NUMTRADES": 0,
+      "SETTLEPRICE": 230425.0
+    }
+  ],
+  "contracts": {
+    "MXH8_2018": {
+      "SECID": "MXH8_2018",
+      "SHORTNAME": "MIX-3.18",
+      "LSTTRADE": "2018-03-15"
+    },
+    "MXM8_2018": {
+      "SECID": "MXM8_2018",
+      "SHORTNAME": "MIX-6.18",
+      "LSTTRADE": "2018-06-21"
+    },
+    "MXU8_2018": {
+      "SECID": "MXU8_2018",
+      "SHORTNAME": "MIX-9.18",
+      "LSTTRADE": "2018-09-20"
+    },
+    "MXZ8_2018": {
+      "SECID": "MXZ8_2018",
+      "SHORTNAME": "MIX-12.18",
+      "LSTTRADE": "2018-12-20"
+    }
+  },
+  "previous_day": [
+    {
+      "TRADEDATE": "2018-01-11",
+      "SECID": "MXH8_2018",
+      "OPEN": 225700.0,
+      "LOW": 224725.0,
+      "HIGH": 227650.0,
+      "CLOSE": 227300.0,
+      "VOLUME": 13639,
+      "OPENPOSITION": 11748,
+      "SHORTNAME": "MIX-3.18",
+      "LSTTRADE": "2018-03-15"
+    },
+    {
+      "TRADEDATE": "2018-01-11",
+      "SECID": "MXM8_2018",
+      "OPEN": 227475.0,
+      "LOW": 227475.0,
+      "HIGH": 227500.0,
+      "CLOSE": 227500.0,
+      "VOLUME": 6,
+      "OPENPOSITION": 38,
+      "SHORTNAME": "MIX-6.18",
+      "LSTTRADE": "2018-06-21"
+    }
+  ]
+}

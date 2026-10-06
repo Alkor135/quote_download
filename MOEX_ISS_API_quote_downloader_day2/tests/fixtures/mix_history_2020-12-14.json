@@ -1,0 +1,23 @@
+{
+  "history": {
+    "columns": [
+      "BOARDID", "TRADEDATE", "SECID", "OPEN", "LOW", "HIGH", "CLOSE",
+      "OPENPOSITIONVALUE", "VALUE", "VOLUME", "OPENPOSITION", "SETTLEPRICE",
+      "SWAPRATE", "WAPRICE", "CHANGE", "QTY", "NUMTRADES", "SHORTNAME",
+      "ASSETCODE", "SWAPRATE_CURR"
+    ],
+    "data": [
+      ["RFUD", "2020-12-14", "MXH1", 328400.0, 326425.0, 332925.0, 326650.0, 2822022900.0, 772300950.0, 2336, 8634, 326850.0, null, 330608.0, -0.51, 1, 1510, "MIX-3.21", "MIX", null],
+      ["RFUD", "2020-12-14", "MXH1MXM1", null, null, null, null, 0.0, null, null, 0, 1250.0, null, null, null, null, 0, "MXH1MXM1", null, null],
+      ["RFUD", "2020-12-14", "MXM1", 329775.0, 329775.0, 329775.0, 329775.0, 435716800.0, 329775.0, 1, 1328, 328100.0, null, 329775.0, null, 1, 1, "MIX-6.21", "MIX", null],
+      ["RFUD", "2020-12-14", "MXU1", 329675.0, 329675.0, 329675.0, 329675.0, 656550.0, 329675.0, 1, 2, 328275.0, null, 329675.0, null, 1, 1, "MIX-9.21", "MIX", null],
+      ["RFUD", "2020-12-14", "MXZ0", 326500.0, 324525.0, 330925.0, 325125.0, 7864406550.0, 10241967175.0, 31174, 24174, 325325.0, null, 328542.0, -0.44, 3, 16551, "MIX-12.20", "MIX", null],
+      ["RFUD", "2020-12-14", "MXZ0MXH1", null, null, null, null, 0.0, null, null, 0, 1525.0, null, null, null, null, 0, "MXZ0MXH1", null, null],
+      ["RFUD", "2020-12-14", "MXZ1", null, null, null, null, 0.0, null, null, 0, 323225.0, null, null, null, null, 0, "MIX-12.21", "MIX", null]
+    ]
+  },
+  "history.cursor": {
+    "columns": ["INDEX", "TOTAL", "PAGESIZE"],
+    "data": [[0, 7, 100]]
+  }
+}
