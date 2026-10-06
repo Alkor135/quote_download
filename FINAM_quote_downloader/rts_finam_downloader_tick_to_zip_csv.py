@@ -1,9 +1,17 @@
-r"""Скачивает тиковые сделки RTS с Финама в отдельный CSV внутри ZIP за каждый день.
+r"""Скачивает тики склеенных контрактов RTS в отдельный CSV внутри ZIP за каждый день.
 
 Примеры запуска из корня проекта quote_download:
     .venv\Scripts\python.exe FINAM_quote_downloader\rts_finam_downloader_tick_to_zip_csv.py
     .venv\Scripts\python.exe FINAM_quote_downloader\rts_finam_downloader_tick_to_zip_csv.py --start 2022-02-11 --end 2022-02-11 --output data\finam_probe --timeout 15 --attempts 1
 
+Загружается склеенная серия SPFB.RTS в формате datf=9.
+CSV содержит только datetime,last,volume, уменьшая объём загрузки и хранения.
+В склеенных данных дополнительные поля ticker и contract для выбранной серии
+всегда одинаковы, в том числе при смене срочного контракта. Определить момент
+перехода контракта по этим полям невозможно, поэтому они не запрашиваются
+и не сохраняются. Сменой контрактов внутри склейки управляет Финам.
+Имена ZIP и CSV содержат только дату. Повторный запуск догружает отсутствующие
+дни; существующие ZIP не перезаписываются. Старую базу можно удалить вручную.
 Без аргументов используются настройки внизу файла. Гостевой токен сайта
 получается автоматически без логина и пароля. Переменная FINAM_TOKEN
 позволяет использовать токен сайта, скопированный вручную из браузера.
@@ -46,6 +54,8 @@ def make_timestamps_unique(df, time_column="datetime"):
     До 1000 сделок включительно шаг составляет 1 мс. Для более плотной секунды
     шаг уменьшается до целого числа наносекунд. Совпавшие сделки не удаляются.
     На входе ожидается исходное время с точностью до секунды.
+    df — таблица сделок, time_column — имя колонки времени; возвращается копия
+    таблицы с уникальными условными метками, без удаления сделок.
     """
     result = df.copy()
     stamps = result[time_column]
@@ -69,7 +79,12 @@ class DownloadFinam:
 
     def __init__(self, ticker: str, dir_data: str, market: int, daft: int,
                  period: int = 1, *, timeout: float = 30, attempts: int = 3):
-        """Задаёт инструмент, папку, формат и ограничение сетевых попыток."""
+        """Настраивает ticker, папку dir_data, рынок market и формат daft.
+
+        period=1 означает тики, daft=9 — формат без полей тикера и контракта.
+        timeout — секунды операции, attempts — число сетевых попыток.
+        Результат — настроенный экземпляр; сеть в конструкторе не вызывается.
+        """
         if ticker not in TICKERS:
             raise ValueError(f"Неизвестный тикер {ticker}: добавьте его в settings.py")
         if period != 1 or daft != 9:
@@ -90,7 +105,11 @@ class DownloadFinam:
         self.req = None
 
     def create_request_finam(self, download_date: str) -> None:
-        """Составляет запрос по параметрам действующей формы экспорта Финама."""
+        """Заполняет self.req запросом склейки за download_date (ГГГГММДД).
+
+        Использует ID выбранной серии из settings.py и сохраняет URL в self.url.
+        Сменой срочных контрактов внутри склейки управляет Финам.
+        """
         day = datetime.datetime.strptime(download_date, "%Y%m%d").date()
         code = self.ticker.removeprefix("SPFB.")
         params = {
@@ -112,14 +131,14 @@ class DownloadFinam:
         })
 
     def path_file(self, file_name_date: str) -> Path:
-        """Возвращает путь дневного архива и при необходимости создаёт папку."""
+        """Возвращает Path дневного ZIP для file_name_date (ГГГГММДД), создавая папку."""
         datetime.datetime.strptime(file_name_date, "%Y%m%d")
         folder = Path(self.dir_data)
         folder.mkdir(parents=True, exist_ok=True)
         return folder / f"{file_name_date}.zip"
 
     def _fetch(self) -> bytes:
-        """Получает ответ с тайм-аутом и повторами, не выводя URL с токеном."""
+        """Возвращает байты ответа self.req с повторами, не выводя URL с токеном."""
         for attempt in range(1, self.attempts + 1):
             try:
                 with urlopen(self.req, timeout=self.timeout) as response:
@@ -153,7 +172,7 @@ class DownloadFinam:
         raise DownloadError("Не удалось получить ответ Финама")
 
     def _http_error_detail(self, error: HTTPError) -> str:
-        """Читает короткое пояснение сервера, убирая HTML, URL и значения токенов."""
+        """Возвращает пояснение HTTPError error без HTML, URL и значений токенов."""
         try:
             raw = error.read(8192)
         except (OSError, IncompleteRead):
@@ -180,7 +199,11 @@ class DownloadFinam:
         return f"Ответ сервера: {text[:800]}" if text else "Сервер не прислал пояснения."
 
     def _parse(self, body: bytes, download_date: str) -> pd.DataFrame:
-        """Проверяет CSV, торговый день, порядок времени, цены и объёмы."""
+        """Проверяет body и возвращает таблицу сделок за download_date (ГГГГММДД).
+
+        Проверяет время, порядок строк, цены и объёмы. Сохраняет все сделки
+        в трёх колонках datetime,last,volume без полей тикера и контракта.
+        """
         try:
             text = body.decode("utf-8-sig")
             frame = pd.read_csv(StringIO(text), dtype={"<DATE>": str, "<TIME>": str})
@@ -212,7 +235,11 @@ class DownloadFinam:
         return make_timestamps_unique(pd.DataFrame({"datetime": stamps, "last": prices, "volume": volumes}))
 
     def run(self, download_date: str) -> Path | None:
-        """Сохраняет проверенный CSV атомарно; существующие архивы не перезаписывает."""
+        """Догружает download_date (ГГГГММДД) и возвращает Path ZIP либо None без сделок.
+
+        Существующие ZIP пропускаются до авторизации и не изменяются. Новый архив
+        публикуется только после проверки ответа и успешного завершения записи.
+        """
         file_path = self.path_file(download_date)
         if file_path.exists():
             if not zipfile.is_zipfile(file_path):
@@ -257,7 +284,11 @@ end_date_range = datetime.date.today() - datetime.timedelta(days=1)
 
 
 def main(argv=None) -> int:
-    """Загружает выбранный диапазон и останавливается при неустранённой ошибке."""
+    """Догружает диапазон по argv и возвращает 0, 1 при ошибке либо 130 при прерывании.
+
+    argv — аргументы командной строки или None для sys.argv. Существующие дни
+    пропускаются; в новых CSV сохраняются только datetime,last,volume.
+    """
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--start", type=datetime.date.fromisoformat, default=start_date_range,
                         help="Начало диапазона, ГГГГ-ММ-ДД")

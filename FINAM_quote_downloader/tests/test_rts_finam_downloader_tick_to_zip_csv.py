@@ -17,7 +17,7 @@ import pandas as pd
 
 import rts_finam_downloader_tick_to_zip_csv as source
 import finam_guest_token as auth
-from test_finam_guest_token import CONFIG, Response, auth_response, fixture_token
+from FINAM_quote_downloader.tests.test_finam_guest_token import CONFIG, Response, auth_response, fixture_token
 
 
 CSV = b"<DATE>,<TIME>,<LAST>,<VOL>\n20220211,070001,100,2\n20220211,070001,100,3\n20220211,070002,101,4\n"
