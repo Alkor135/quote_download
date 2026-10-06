@@ -19,8 +19,11 @@ OPENPOSITION подстановка запрещена. Операция отм�
 Для их перепроверки служит --recheck-empty-weekends. Пустые будние дни и дни
 с неполными котировками проверяются снова; описания кешируются в Contracts.
 Текущий день и неполные пары не записываются. Дополнительные пакеты не нужны.
-Журналы UTF-8 дописываются в logs рядом со скриптом: RTS_day2.log содержит
+Журналы UTF-8 перезаписываются в logs при каждом запуске загрузки:
+RTS_day2.log содержит
 ход загрузки, RTS_day2_errors.log — предупреждения, ошибки и исходные данные ISS.
+Старые резервные копии этих журналов удаляются. Внутри одного запуска действует
+ротация при 5 МиБ: до трёх резервных копий содержат только данные этого запуска.
 При отказе проверки истории в журнале сохраняются дата, SECID, URL и исходный JSON.
 Для неполной пары сохраняются NUMTRADES и SETTLEPRICE; SETTLEPRICE не подставляется
 в OHLC. Сохранённые подстановки перепроверяются с --recheck-filled.
@@ -115,7 +118,7 @@ def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--db", type=Path, default=DEFAULT_DB,
                         help=f"Путь SQLite БД (по умолчанию {DEFAULT_DB}).")
     parser.add_argument("--log-dir", type=Path, default=DEFAULT_LOG_DIR,
-                        help="Папка журналов (по умолчанию logs рядом со скриптом).")
+                        help="Папка журналов последнего запуска (logs рядом со скриптом); файлы перезаписываются.")
     parser.add_argument("--recheck-empty-weekends", action="store_true",
                         help="Повторно запросить подтверждённые пустые субботы и воскресенья в заданном периоде.")
     parser.add_argument("--recheck-filled", action="store_true",
@@ -149,7 +152,7 @@ def close_logging() -> None:
 
 
 def configure_logging(log_dir: Path) -> tuple[Path, Path]:
-    """Настраивает консоль и два UTF-8 журнала в log_dir; возвращает пути общего журнала и ошибок."""
+    """Очищает два журнала и их старые копии в log_dir, настраивает ротацию по 5 МиБ с тремя копиями; возвращает пути."""
     close_logging()
     log_dir.mkdir(parents=True, exist_ok=True)
     full_path = log_dir / f"{ASSETCODE}_day2.log"
@@ -161,6 +164,9 @@ def configure_logging(log_dir: Path) -> tuple[Path, Path]:
     LOGGER.addHandler(console)
     formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s%(details)s", defaults={"details": ""})
     for path, level in ((full_path, logging.INFO), (error_path, logging.WARNING)):
+        for index in range(1, 4):
+            path.with_name(f"{path.name}.{index}").unlink(missing_ok=True)
+        path.write_text("", encoding="utf-8")
         handler = RotatingFileHandler(path, maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8")
         handler.setLevel(level)
         handler.setFormatter(formatter)

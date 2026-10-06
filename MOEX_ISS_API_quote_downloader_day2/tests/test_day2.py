@@ -5,7 +5,9 @@
 Проверяются экспирация, пропуски в истории, атомарная запись, пагинация,
 сетевые ошибки, файловые журналы с исходными NULL, подстановка предыдущего
 закрытия только при отсутствии сделок, её маркировка и кеш пустых выходных
-и ограничение загрузки вчерашним московским днём. Ответ MIX за 14.12.2020
+и ограничение загрузки вчерашним московским днём. При повторном запуске
+оба журнала и их резервные копии очищаются без изменения посторонних файлов.
+Ответ MIX за 14.12.2020
 проверяет исключение календарных спредов с NULL ASSETCODE на доске RFUD.
 
 Запуск из корня quote_download:
@@ -894,22 +896,33 @@ class FileLoggingTests(unittest.TestCase):
                 self.assertIn("date=2020-12-14", details["request_url"])
                 self.assertEqual(details["response"], body)
 
-    def test_repeat_logging_appends_without_duplicate_handlers(self):
-        """Повторная настройка не стирает прежний журнал и не дублирует новые сообщения."""
+    def test_repeat_logging_keeps_only_last_run_without_duplicate_handlers(self):
+        """Новый запуск очищает оба журнала и старые копии, сохраняет посторонние файлы и не дублирует сообщения."""
         for name in MODULES:
             source = importlib.import_module(name)
             with tempfile.TemporaryDirectory(dir=DIRECTORY) as temporary, \
                     patch("sys.stderr", new_callable=io.StringIO):
                 try:
-                    source.configure_logging(Path(temporary))
+                    full_path, error_path = source.configure_logging(Path(temporary))
                     source.LOGGER.warning("Первое предупреждение")
+                    backups = [path.with_name(f"{path.name}.{index}")
+                               for path in (full_path, error_path) for index in range(1, 4)]
+                    for path in backups:
+                        path.write_text("Старый запуск", encoding="utf-8")
+                    unrelated = Path(temporary) / "other.log.1"
+                    unrelated.write_text("Посторонний файл", encoding="utf-8")
                     source.configure_logging(Path(temporary))
+                    self.assertEqual(error_path.read_text(encoding="utf-8"), "")
+                    self.assertEqual(full_path.read_text(encoding="utf-8"), "")
                     source.LOGGER.error("Второе сообщение")
                 finally:
                     source.close_logging()
-                content = (Path(temporary) / f"{source.ASSETCODE}_day2_errors.log").read_text(encoding="utf-8")
-                self.assertEqual(content.count("Первое предупреждение"), 1)
-                self.assertEqual(content.count("Второе сообщение"), 1)
+                for path in (full_path, error_path):
+                    content = path.read_text(encoding="utf-8")
+                    self.assertNotIn("Первое предупреждение", content)
+                    self.assertEqual(content.count("Второе сообщение"), 1)
+                self.assertFalse(any(path.exists() for path in backups))
+                self.assertEqual(unrelated.read_text(encoding="utf-8"), "Посторонний файл")
 
     def test_main_logs_network_failure_and_preserves_existing_database(self):
         """Отказ сети должен записаться в файл, вернуть код 1 и оставить ранее сохранённые дни."""
