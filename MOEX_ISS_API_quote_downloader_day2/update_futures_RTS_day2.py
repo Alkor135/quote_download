@@ -62,7 +62,7 @@ from urllib.request import Request, urlopen
 ASSETCODE = "RTS"
 DEFAULT_DB = Path(r"C:\data_quote\day2\RTS_day2.db")
 DEFAULT_LOG_DIR = Path(__file__).resolve().parent / "logs"
-FIRST_DATE = date(2018, 1, 1)
+FIRST_DATE = date(2026, 9, 1)
 MOSCOW = timezone(timedelta(hours=3), name="Europe/Moscow")
 ISS_BASE = "https://iss.moex.com/iss"
 HISTORY_PATH = "/history/engines/futures/markets/forts/securities.json"
